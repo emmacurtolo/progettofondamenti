@@ -1,30 +1,46 @@
 ---
-title: "Progetto Fondamenti"
+title: "Chiara Ferragni"
 author: "Emma Curtolo"
 date: "7/7/2020"
-output: ioslides_presentation
+output:
+  ioslides_presentation:
+    css: style.css
+    incremental: yes
+    logo: logoferragni.png
+  slidy_presentation:
+    incremental: yes
+editor_options:
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE)
 ```
 
-## Chiara Ferragni
-Imprenditrice digitale di 33 anni, nominata da Forbes come persona
-più influente del mondo nell' ambito moda (classifica di Forbes
-“under 30”).
+## Informazioni generali:
+Imprenditrice digitale di 33 anni, nominata da **Forbes** come persona
+più influente del mondo nell'ambito moda.
+
+
 Amministratrice delegata delle sue due società:
-Serendipity Srl(fatturato di 1,68 milioni) e Tbs Crew Srl(fatturato di 3,2 milioni).
-Il suo brand chiaraferragnicollection vale 36,2 milioni di euro
+
+
+Serendipity Srl (fatturato di 1,68 milioni euro) e Tbs Crew Srl (fatturato di 3,2 milioni euro).
+
+
+Il suo brand "chiaraferragnicollection" vale 36,2 milioni di euro
 e tutto è partito con un blog.
 
-## L'intrattenimento della quarantena: 
-Mi sono posta delle domande:
-- Influenza della quarantena sui follower
-- Pubblico che raggiunge ogni giorno
-- Quanto può guadagna con instagram
+## Introduzione: 
+Mi sono sorte alcune curiosità riguardo il business di Chiara Ferragni durante la quarantena:
 
-```{r}
+- Impatto economico/sociale del suo profilo Instagram
+
+- Pubblico che ha raggiunto ogni giorno
+
+- Quanto ha guadagnato con Instagram durante questo periodo
+
+```{r echo=FALSE}
 library(readr)
 library(tidyr)
 library(lubridate)
@@ -41,15 +57,16 @@ marca <-tibble()
 marca<-read.csv("postMarca.csv")
 ```
 
-## Crescita follower in quarantena
+## Crescita follower durante la quarantena
 
-```{r}
+```{r echo=FALSE}
 chiara$date <- as.Date(chiara$date, "%Y-%m-%d")
 
-ggplot(chiara, aes(date, follower)) + 
-  geom_line()+
+ggplot(chiara, aes(date, newfollower)) + 
+  geom_line(colour = "red")+ 
+  geom_smooth(colour = "darkred")+
   labs(
-    title = "Follower groth",
+    title = "Follower growth",
     subtitle = "During Quarantine",
     caption = "https://www.followerstat.it",
     x = "from 01/03/2020 to 01/06/2020",
@@ -58,16 +75,16 @@ ggplot(chiara, aes(date, follower)) +
   theme_classic()
 ```
 
-## Crescita follower prima della quarantena
+## Livello dei follower prima della quarantena
 
-```{r pressure}
+```{r echo=FALSE}
 chiara2$date <- as.Date(chiara2$date, "%Y-%m-%d")
-
-ggplot(data = chiara2, mapping = aes(x = date, y = follower)) +
-  geom_point() + 
-  geom_smooth(se = FALSE)+
+chiara2 <- chiara2 %>% filter(!is.na(newfollower))
+ggplot(data = chiara2, mapping = aes(x = date, y = newfollower)) + 
+  geom_line(colour = "darkgreen") +
+  geom_point(colour = "green") + 
   labs(
-    title = "Follower groth",
+    title = "Follower growth",
     subtitle = "Before Quarantine",
     caption = "https://www.followerstat.it",
     x = "from 01/12/2019 to 29/02/2020",
@@ -76,109 +93,162 @@ ggplot(data = chiara2, mapping = aes(x = date, y = follower)) +
   theme_classic()
 ```
 
-## Numero min e max di follower ottenuti in un giorno
-```{r}
-seguaci <- chiara %>% select(follower)
-seguaci=array(as.numeric(unlist(seguaci)))
-massimo <- max(seguaci)
-minimo <- min(seguaci)
-minmax <- tibble(massimo,minimo)
-minmax
-```
-
-## Numero follower nel weekend
-```{r}
+## Distribuzione follower nei giorni della settimana
+```{r echo=FALSE}
 chiara <- chiara %>% 
   mutate(day = wday(date, label = TRUE))
-ggplot(chiara,aes(x = day, y = follower)) +
-  geom_point() + 
-  geom_smooth()
+
+ggplot(chiara,aes(x = day, y = newfollower)) +
+  geom_point(colour = "violet")+
+  labs(
+    title = "Follower growth during quarantine",
+    subtitle = "Week Days",
+    caption = "https://www.followerstat.it",
+    x = "from 01/03/2020 to 01/06/2020",
+    y = "acquired followers"
+  ) +
+  theme_classic()
+```
+
+## Profili Instagram seguiti da Chiara Ferragni
+
+```{r echo=FALSE}
+chiara$date <- as.Date(chiara$date, "%Y-%m-%d")
+chiara <- chiara %>% filter(!is.na(newfollowing))
+ggplot(chiara, aes(date, newfollowing)) +
+  geom_col(colour = "blue")+ 
+  labs(
+    title = "Following Trend",
+    subtitle = "During Quarantine",
+    caption = "https://www.followerstat.it",
+    x = "from 01/03/2020 to 01/06/2020",
+    y = "following"
+  )+
+  theme_classic()
 ```
 
 
-## Numero post nel weekend
-```{r}
-npost <- chiara %>% 
-  mutate(day = wday(date, label = TRUE)) %>% select(newpost)
+## Numero post pubblicati nel weekend
+```{r echo=FALSE}
+temp <- chiara %>% filter(!is.na(newpost),!(day %in% c("lun", "mar","mer","gio","ven")))
 
-chiara %>%
-  group_by(npost) %>%
-  summarise(n = n())
-
-temp <- chiara %>% filter(day %in% c("Sab", "Dom"))
-ggplot(temp, aes(date, n))
-  geom_line() +
-  geom_smooth(se = FALSE, span = 0.20)
-
-```
-
-## Numero post durante la settimana
-```{r}
-npost <- chiara %>% 
-  mutate(day = wday(date, label = TRUE)) %>% select(newpost)
-
-chiara %>%
-  group_by(npost) %>%
-  summarise(n = n())
-
-temp <- filter(! (day %in% c("Sab", "Dom")))
-ggplot(temp, aes(date, n))
-  geom_line() +
-  geom_smooth(se = FALSE, span = 0.20)
-```
-
-## Guadagno per post
-**un suo post può valere 58.300 dollari**
-Questioni Legali:
-Pricavy e Sicurity
-Ho creato un csv con gli sponsor.
-
-```{r}
-marca$DATA <- as.Date(marca$DATA, "%d/%m/%Y")
-sponsor <- marca %>% mutate(MARCA)
-guadagno <- marca %>% count(sponsor)*58000
-tabguadagno <- tibble(MARCA, guadagno)
-```
-
-## Sponsor durante la quarantena
-
-```{r}
-sponsor <- marca %>% 
-  group_by(MARCA) %>% 
-  summarise(n = n())
-
-ggplot(data = sponsor) + 
-  geom_bar(mapping = aes(x = MARCA, fill = n)) 
-```
-
-
-## Post totali e post pubblicizzati in media
-```{r}
-marca$DATA <- as.Date(marca$DATA, "%d/%m/%Y")
-
-postTot <- chiara %>% count(group_by %>% select(newpost))
-postMarca <- marca %>% filter(count(MARCA))
-unione <- left_join(postTot,postMarca)
-
-ggplot(unione , aes(postTot, postMarca)) + 
-  geom_line()
+ggplot(data = temp) +
+  geom_violin(mapping = aes(x = newpost, y = day), colour = "orange",fill = "orange")+ 
+  labs(
+    title = "Post",
+    subtitle = "During Weekend",
+    caption = "https://www.followerstat.it",
+    x = "from 01/03/2020 to 01/06/2020",
+    y = "Week Days"
+  )+
+  theme_classic()
 
 ```
 
-## Raccolta fondi per corona virus
-1 milione in 5 ore
-Oltre 3 milioni in 24 ore da 92 paesi diversi.
-Infine raccolti in totale 4,4 milioni di euro
-da oltre 200 mila persone.
 
+## Numero post dal lunedì al venerdì
+```{r echo=FALSE}
+temp2 <- chiara %>% filter(! (day %in% c("sab", "dom")))
+
+ggplot(data = temp2) +
+  geom_violin(mapping = aes(x = newpost, y = day),colour = "yellow", fill  = "yellow")+ 
+  labs(
+    title = "Post",
+    subtitle = "During The Week",
+    caption = "https://www.followerstat.it",
+    x = "from 01/03/2020 to 01/06/2020",
+    y = "Week Days"
+  )+
+  theme_classic()
+```
+
+## Numero post dal lunedì al venerdì senza il valore negativo
 ```{r}
-datedon <- filter(chiara, date=="2020-03-09" & date=="2020-03-10")
-donation <- chiara %>% select(follower,datedon)
-ggplot(data = donation) +
-  geom_freqpoly(mapping = aes(x = donation), binwidth = 0.2)
+temp2 <- chiara %>% filter((newpost>0),! (day %in% c("sab", "dom")))
+
+ggplot(data = temp2) +
+  geom_violin(mapping = aes(x = newpost, y = day),colour = "purple", fill="purple")+ 
+  labs(
+    title = "Post",
+    subtitle = "During The Week",
+    caption = "https://www.followerstat.it",
+    x = "from 01/03/2020 to 01/06/2020",
+    y = "Week Days"
+  )+
+  theme_classic()
+```
+
+## Andamento totale di post durante la settimana
+```{r echo=FALSE}
+temp3 <- chiara %>% filter((newpost>0),day %in% c("lun","mar","mer","gio","ven","sab", "dom"))
+
+ggplot(data = temp3) +
+  geom_count(mapping = aes(x = day, y = newpost), colour = "lightblue")+ 
+  labs(
+    title = "Post",
+    subtitle = "During The Week",
+    caption = "https://www.followerstat.it",
+    x = "from 01/03/2020 to 01/06/2020",
+    y = "Week Days"
+  )+
+  theme_classic()
+```
+
+
+## Post con brand pubblicati durante la quarantena
+
+```{r echo=FALSE}
+marca %>%
+  group_by(MARCA) %>%
+  count(MARCA, sort = TRUE) %>%
+  ggplot(aes(MARCA, n, fill = MARCA)) + 
+  geom_col(show.legend = FALSE) +
+  coord_flip()+ 
+  labs(
+    x = "Brand",
+    y = "Post"
+  )+
+  theme_classic()
+```
+
+## Ricavi derivanti dai post
+**Ipotizzando un valore di 50.000 euro per ogni post pubblicato si otterrebbero i seguenti ricavi:**
+```{r echo=FALSE}
+marca %>%
+  group_by(MARCA) %>%
+  count(MARCA, sort = TRUE) %>%
+  mutate(guadagno = n * 50) %>%
+  ggplot(aes(MARCA, guadagno, fill = MARCA)) + 
+  geom_col(show.legend = FALSE) +
+  coord_flip()+ 
+  labs(
+    x = "brand",
+    y = "ricavo in migliaia di euro"
+  )+
+  theme_classic()
+#guadagno totale 1.914.000
+```
+
+## Raccolta fondi per la lotta contro il corona virus
+**1 milione di euro** in 5 ore, **oltre 3 milioni di euro** in 24 ore da 92 paesi diversi.
+
+
+Infine raccolti in totale **4,4 milioni di euro** da oltre 200 mila persone.
+
+```{r echo=FALSE}
+datedon <- chiara %>% filter(date==as.Date("2020-03-08") | date==as.Date("2020-03-09") | date==as.Date("2020-03-10")) 
+
+ggplot(data = datedon, aes(date, newfollower)) +
+  geom_area(fill = "pink")+ 
+  labs(
+    title = "Fund Raising",
+    x = "from 08/03/2020 to 10/03/2020",
+    y = "follower growth"
+  )+
+  theme_classic() 
 ```
 
 
 ## The End
 
-"Just because i'm blonde doesn't mean i'm dumb"
+***"Just because i'm blonde doesn't mean i'm dumb"***
